@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Virtual environment
+venv/
+.env
+*.env
+
+# Django
+/media/
+staticfiles/
+*.pot
+*.pyc
+*.pyo
+*.mo
+
+# VSCode / PyCharm / JetBrains
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Migrations cache
+**/migrations/__pycache__/
