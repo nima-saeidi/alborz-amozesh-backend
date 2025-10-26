@@ -1,24 +1,43 @@
-# ===========================================
-# users/views.py
-# ===========================================
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
-from rest_framework import generics, permissions
-from rest_framework.response import Response
-from .serializers import UpdateProfileSerializer
-from .serializers import RegisterSerializer, LoginSerializer
-from django.contrib.auth import get_user_model
+from .serializers import (
+    BaseRegisterSerializer,
+    TeacherRegisterSerializer,
+    LoginSerializer,
+    TeacherUpdateProfileSerializer,
+    StudentUpdateProfileSerializer
+)
+from .models import User, Teacher
 
-User = get_user_model()
-
-
-# -------------------- Register API --------------------
+# -------------------- Register API (Student) --------------------
 class RegisterAPIView(generics.CreateAPIView):
-    serializer_class = RegisterSerializer
+    serializer_class = BaseRegisterSerializer
     permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "user_id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token)
+        }, status=status.HTTP_201_CREATED)
+
+
+# -------------------- Register API (Teacher) --------------------
+class TeacherRegisterAPIView(generics.CreateAPIView):
+    serializer_class = TeacherRegisterSerializer
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -70,11 +89,20 @@ class LoginAPIView(generics.GenericAPIView):
 
 # -------------------- Update Profile API --------------------
 class UpdateProfileAPIView(generics.UpdateAPIView):
-    serializer_class = UpdateProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_serializer_class(self):
+        user = self.request.user
+        if hasattr(user, 'teacher'):  #to recegniz the user role by matching it to the databese relation
+            return TeacherUpdateProfileSerializer
+        else:
+            return StudentUpdateProfileSerializer
+
     def get_object(self):
-        return self.request.user
+        user = self.request.user
+        if hasattr(user, 'teacher'):
+            return user.teacher
+        return user
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)

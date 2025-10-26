@@ -20,19 +20,14 @@ class User(AbstractUser):
 
 # -------------------- TEACHER --------------------
 class Teacher(models.Model):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher')
     education_degree = models.CharField(max_length=100, null=True, blank=True)
     academic_field = models.CharField(max_length=100, null=True, blank=True)
-    last_login = models.DateTimeField(null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
-    profile_image = models.ImageField(upload_to='teacher_images/', null=True, blank=True)  # profile picture
+    profile_image = models.ImageField(upload_to='teacher_images/', null=True, blank=True)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.user.first_name} {self.user.last_name}"
     
     
 # -------------------- COURSE --------------------
