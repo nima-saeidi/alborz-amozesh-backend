@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import check_password
 from users.models import User
-from .models import AdminProfile
+from .models import AdminProfile, Gallery
 from django.contrib.auth.password_validation import validate_password
 
 class AdminLoginSerializer(serializers.Serializer):
@@ -37,3 +37,13 @@ class AdminRegisterSerializer(serializers.ModelSerializer):
 
         AdminProfile.objects.create(user=user, access_level=access_level)
         return user
+
+
+# -------------------- GALLERY --------------------
+class GallerySerializer(serializers.ModelSerializer):
+    uploaded_by = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Gallery
+        fields = '__all__'
+        read_only_fields = ('id', 'uploaded_at', 'uploaded_by', 'views_count')

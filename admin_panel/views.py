@@ -1,18 +1,18 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
-from .serializers import AdminLoginSerializer, AdminRegisterSerializer
+from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer
 from django.contrib.auth import get_user_model
 from .permissions import IsSuperAdmin
-from rest_framework.permissions import AllowAny
+from .models import Gallery, AdminProfile
 
 User = get_user_model()
 
 class AdminLoginAPIView(generics.GenericAPIView):
     serializer_class = AdminLoginSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -61,3 +61,28 @@ class AdminRegisterAPIView(generics.CreateAPIView):
             "access_level": user.admin_profile.access_level,
             "access_level_name": user.admin_profile.get_access_level_display()
         }, status=status.HTTP_201_CREATED)
+
+
+
+class GalleryCreateAPIView(generics.CreateAPIView):
+    queryset = Gallery.objects.all()
+    serializer_class = GallerySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        # if the user is admin
+        if not hasattr(user, 'admin_profile'):
+            return Response({"detail": "Only admins can access this API."}, status=status.HTTP_403_FORBIDDEN)
+
+        admin_profile = user.admin_profile
+
+        # access able just for admin level 1,5
+        if admin_profile.access_level not in [1, 5]:
+            return Response({"detail": "You do not have permission to add gallery items."}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(uploaded_by=user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
