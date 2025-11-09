@@ -1,25 +1,37 @@
 # ===========================================
-# users/models.py
+# users/models.py — Final Stable Version
 # ===========================================
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 # -------------------- USER --------------------
 class User(AbstractUser):
+    """
+    Base user model that extends Django's AbstractUser.
+    Includes personal info fields common to both students and teachers.
+    """
     birthday_date = models.DateField(null=True, blank=True)
     national_id = models.CharField(max_length=20, null=True, blank=True)
     gender = models.CharField(max_length=10, null=True, blank=True)
     fathers_name = models.CharField(max_length=100, null=True, blank=True)
     education_level = models.CharField(max_length=100, null=True, blank=True)
-    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)  # profile picture
+    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
+
+    # Make email unique and required
+    email = models.EmailField(unique=True)
+
+    REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
+    USERNAME_FIELD = 'username'  # username still used for login in backend (email used for authentication logic)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
 
 
-
 # -------------------- TEACHER --------------------
 class Teacher(models.Model):
+    """
+    Each teacher is linked one-to-one with a User.
+    """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher')
     education_degree = models.CharField(max_length=100, null=True, blank=True)
     academic_field = models.CharField(max_length=100, null=True, blank=True)
@@ -28,10 +40,13 @@ class Teacher(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
-    
-    
+
+
 # -------------------- COURSE --------------------
 class Course(models.Model):
+    """
+    Courses belong to teachers and have various metadata.
+    """
     title = models.CharField(max_length=200)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='courses')
     start_date = models.DateField(null=True, blank=True)
@@ -61,6 +76,9 @@ class Course(models.Model):
 
 # -------------------- INVOICE --------------------
 class Invoice(models.Model):
+    """
+    Represents a student's enrollment in a course.
+    """
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='invoices')
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='invoices')
     date_time = models.DateTimeField(auto_now_add=True)
@@ -68,5 +86,8 @@ class Invoice(models.Model):
     grade = models.CharField(max_length=10, null=True, blank=True)
     score = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
 
+    class Meta:
+        unique_together = ('student', 'course')  # Prevent duplicate enrollment
+
     def __str__(self):
-        return f"Invoice {self.id} - {self.student.email}"
+        return f"Invoice {self.id} - {self.student.email} - {self.course.title}"
