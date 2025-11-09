@@ -5,7 +5,7 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.hashers import check_password
-from .models import Teacher
+from .models import Teacher, Course
 
 User = get_user_model()
 
@@ -95,3 +95,10 @@ class StudentUpdateProfileSerializer(BaseUpdateProfileSerializer):
             'first_name', 'last_name', 'email', 'birthday_date', 'national_id',
             'gender', 'fathers_name', 'education_level', 'profile_image', 'current_password'
         )
+# ----------------------- Cousrse Serializer -----------------------
+
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = '__all__'
+        read_only_fields = ['created_at', 'last_updated']

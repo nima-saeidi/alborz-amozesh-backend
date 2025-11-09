@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer
+from users.serializers import CourseSerializer
 from django.contrib.auth import get_user_model
 from .permissions import IsSuperAdmin
 from .models import Gallery, AdminProfile
@@ -86,3 +87,30 @@ class GalleryCreateAPIView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(uploaded_by=user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+class CreateCourseAPIView(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]  
+    
+    def post(self, request):
+        user = request.user
+
+        # check for if user is admin or not
+        if not hasattr(user, 'admin_profile'):
+            return Response({"error": "Only admins can access this API."}, status=status.HTTP_403_FORBIDDEN)
+
+        admin_profile = user.admin_profile
+
+        # access leve of admin
+        if admin_profile.access_level >= 4:
+            return Response({"error": "You do not have permission to add course."}, 
+                            status=status.HTTP_403_FORBIDDEN)
+
+        serializer = CourseSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "sucseesful", "course": serializer.data}, 
+                            status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
