@@ -4,12 +4,19 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer
-from users.serializers import CourseSerializer
+from users.serializers import CourseSerializer, UserSerializer
 from django.contrib.auth import get_user_model
 from .permissions import IsSuperAdmin
 from .models import Gallery, AdminProfile
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import PermissionDenied
 
 User = get_user_model()
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class AdminLoginAPIView(generics.GenericAPIView):
     serializer_class = AdminLoginSerializer
@@ -114,3 +121,32 @@ class CreateCourseAPIView(generics.CreateAPIView):
                             status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserListAPIView(generics.ListAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        user = self.request.user
+        # access leve of admin
+        if hasattr(user, 'admin_profile') and user.admin_profile.access_level == 5:
+            return User.objects.all().order_by('id')
+        else:
+            raise PermissionDenied("You do not have permission to view this resource.")
+        
+        
+class AdminUserUpdateAPIView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        user = super().get_object()
+        admin = self.request.user
+        
+        if hasattr(admin, 'admin_profile') and admin.admin_profile.access_level == 5:
+            return user
+        else:
+            raise PermissionDenied("You do not have permission to edit this user.")

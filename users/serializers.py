@@ -157,3 +157,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_courses(self, obj):
         invoices = Invoice.objects.filter(student=obj)
         return CourseSerializer([invoice.course for invoice in invoices], many=True).data
+    
+    
+# this is for admin side to editing the user filds    
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        #for CRUD actions on admin side
+        fields = '__all__'
