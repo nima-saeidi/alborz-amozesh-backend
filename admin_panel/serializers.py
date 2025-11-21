@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import check_password
-from users.models import User
+from users.models import User, Course
 from .models import AdminProfile, Gallery
 from django.contrib.auth.password_validation import validate_password
 
@@ -47,3 +47,10 @@ class GallerySerializer(serializers.ModelSerializer):
         model = Gallery
         fields = '__all__'
         read_only_fields = ('id', 'uploaded_at', 'uploaded_by', 'views_count')
+        
+
+# ------------ Courses for admin management ------------
+class AdminCourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = '__all__' 

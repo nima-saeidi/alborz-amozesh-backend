@@ -1,12 +1,12 @@
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status, permissions, viewsets
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
-from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer
-from users.serializers import CourseSerializer, UserSerializer
+from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer, AdminCourseSerializer
+from users.serializers import CourseSerializer, UserSerializer, Course
 from django.contrib.auth import get_user_model
-from .permissions import IsSuperAdmin
+from .permissions import IsSuperAdmin, HasAdminLevel
 from .models import Gallery, AdminProfile
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
@@ -71,82 +71,25 @@ class AdminRegisterAPIView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
-
-class GalleryCreateAPIView(generics.CreateAPIView):
+# ---------------------- Gallery (CRUD) ----------------------
+class GalleryViewSet(viewsets.ModelViewSet):
     queryset = Gallery.objects.all()
     serializer_class = GallerySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [HasAdminLevel.level(1)]
 
-    def post(self, request, *args, **kwargs):
-        user = request.user
+    def perform_create(self, serializer):
+        serializer.save(uploaded_by=self.request.user)
 
-        # if the user is admin
-        if not hasattr(user, 'admin_profile'):
-            return Response({"detail": "Only admins can access this API."}, status=status.HTTP_403_FORBIDDEN)
-
-        admin_profile = user.admin_profile
-
-        # access able just for admin level 1,5
-        if admin_profile.access_level not in [1, 5]:
-            return Response({"detail": "You do not have permission to add gallery items."}, status=status.HTTP_403_FORBIDDEN)
-
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(uploaded_by=user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-
-class CreateCourseAPIView(generics.CreateAPIView):
-    permission_classes = [permissions.IsAuthenticated]  
+# ---------------------- Course (CRUD) ----------------------
+class CourseViewSet(viewsets.ModelViewSet):
+    queryset = Course.objects.all()
+    serializer_class = AdminCourseSerializer
+    permission_classes = [HasAdminLevel.level(4)]
     
-    def post(self, request):
-        user = request.user
-
-        # check for if user is admin or not
-        if not hasattr(user, 'admin_profile'):
-            return Response({"error": "Only admins can access this API."}, status=status.HTTP_403_FORBIDDEN)
-
-        admin_profile = user.admin_profile
-
-        # access leve of admin
-        if admin_profile.access_level >= 4:
-            return Response({"error": "You do not have permission to add course."}, 
-                            status=status.HTTP_403_FORBIDDEN)
-
-        serializer = CourseSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "sucseesful", "course": serializer.data}, 
-                            status=status.HTTP_201_CREATED)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class UserListAPIView(generics.ListAPIView):
+        
+# ---------------------- User (CRUD) ----------------------
+class AdminUserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all().order_by('id')
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
     pagination_class = StandardResultsSetPagination
-
-    def get_queryset(self):
-        user = self.request.user
-        # access leve of admin
-        if hasattr(user, 'admin_profile') and user.admin_profile.access_level == 5:
-            return User.objects.all().order_by('id')
-        else:
-            raise PermissionDenied("You do not have permission to view this resource.")
-        
-        
-class AdminUserUpdateAPIView(generics.UpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self):
-        user = super().get_object()
-        admin = self.request.user
-        
-        if hasattr(admin, 'admin_profile') and admin.admin_profile.access_level == 5:
-            return user
-        else:
-            raise PermissionDenied("You do not have permission to edit this user.")
+    permission_classes = [HasAdminLevel.level(5)] #superadmin
