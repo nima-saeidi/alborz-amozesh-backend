@@ -1,8 +1,9 @@
 # ===========================================
-# users/models.py — Final Stable Version
+# users/models.py — Updated Final Version
 # ===========================================
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
 
 # -------------------- USER --------------------
 class User(AbstractUser):
@@ -21,7 +22,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
-    USERNAME_FIELD = 'username'  # username still used for login in backend (email used for authentication logic)
+    USERNAME_FIELD = 'username'
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
@@ -52,8 +53,11 @@ class Course(models.Model):
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     duration = models.IntegerField(null=True, blank=True)
-    notes_file = models.CharField(max_length=255, null=True, blank=True)
-    videos = models.TextField(null=True, blank=True)
+
+    # ❌ Removed because sessions will handle files
+    # notes_file
+    # videos
+
     exam_date = models.DateField(null=True, blank=True)
     cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     logo = models.CharField(max_length=255, null=True, blank=True)
@@ -72,6 +76,29 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# -------------------- COURSE SESSION --------------------
+class CourseSession(models.Model):
+    """
+    A session belongs to a course and contains PDF/video materials.
+    """
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="sessions"
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
+
+    # Session materials
+    video = models.FileField(upload_to="sessions/videos/", null=True, blank=True)
+    pdf = models.FileField(upload_to="sessions/pdfs/", null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.course.title} - {self.title}"
 
 
 # -------------------- INVOICE --------------------

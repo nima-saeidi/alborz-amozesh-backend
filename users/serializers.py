@@ -1,167 +1,135 @@
-# ===========================================
-# users/serializers.py
-# ===========================================
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.hashers import check_password
-from .models import Course, Teacher, Invoice, User
+from django.contrib.auth import get_user_model
+from .models import Teacher, Course, CourseSession, Invoice
 
 User = get_user_model()
-# -------------------- Base Register Serializer --------------------
+
+# -------------------- USER REGISTRATION --------------------
 class BaseRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
-    email = serializers.EmailField(required=True)  
+    password2 = serializers.CharField(write_only=True, required=True, label="Confirm password")
 
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'password')
+        fields = ['first_name', 'last_name', 'email', 'password', 'password2']
 
-    def validate_email(self, value):
-        """Check that the email is unique and not empty"""
-        if not value:
-            raise serializers.ValidationError("Email is required.")
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email is already registered.")
-        return value
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "Passwords must match."})
+        return attrs
 
     def create(self, validated_data):
-        user = self.Meta.model.objects.create(
+        validated_data.pop('password2')
+        user = User.objects.create(
+            username=validated_data['email'],  # Email as username
+            email=validated_data['email'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            email=validated_data['email'],
-            username=validated_data['email']  # username = email
         )
         user.set_password(validated_data['password'])
         user.save()
         return user
 
-# -------------------- Teacher Register Serializer --------------------
-class TeacherRegisterSerializer(BaseRegisterSerializer):
-    # Do NOT include education_degree in Meta.fields because it's not in User model
+# -------------------- TEACHER REGISTRATION --------------------
+class TeacherRegisterSerializer(serializers.ModelSerializer):
+    user = BaseRegisterSerializer()
+
+    class Meta:
+        model = Teacher
+        fields = ['user', 'education_degree', 'academic_field', 'bio', 'profile_image']
 
     def create(self, validated_data):
-        # Create user first
-        user_data = {
-            'first_name': validated_data['first_name'],
-            'last_name': validated_data['last_name'],
-            'email': validated_data['email'],
-            'username': validated_data['email'],
-        }
-        user = User.objects.create(**user_data)
-        user.set_password(validated_data['password'])
-        user.save()
+        user_data = validated_data.pop('user')
+        user_serializer = BaseRegisterSerializer(data=user_data)
+        user_serializer.is_valid(raise_exception=True)
+        user = user_serializer.save()
+        teacher = Teacher.objects.create(user=user, **validated_data)
+        return teacher
 
-        # Then create Teacher instance
-        teacher = Teacher.objects.create(
-            user=user,
-            education_degree=validated_data.get('education_degree', ''),  # optional
-        )
-        return user
-
-
-# -------------------- Login Serializer --------------------
+# -------------------- LOGIN --------------------
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
-
-# -------------------- Base Update Profile Serializer --------------------
-class BaseUpdateProfileSerializer(serializers.ModelSerializer):
+# -------------------- UPDATE CREDENTIALS --------------------
+class UpdateCredentialsSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True, required=True)
-    profile_image = serializers.ImageField(required=False, allow_null=True)
+    new_password = serializers.CharField(write_only=True, required=False)
+    email = serializers.EmailField(required=False)
 
-    def validate_current_password(self, value):
-        user = self.context['request'].user
-        if not check_password(value, user.password):
-            raise serializers.ValidationError("Current password is incorrect.")
-        return value
+# -------------------- USER / STUDENT PROFILE --------------------
+class UserProfileSerializer(serializers.ModelSerializer):
+    selected_courses = serializers.SerializerMethodField()
 
-    def update(self, instance, validated_data):
-        validated_data.pop('current_password', None)  # remove password field
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
-
-
-# -------------------- Teacher Update Profile --------------------
-class TeacherUpdateProfileSerializer(BaseUpdateProfileSerializer):
-    class Meta:
-        model = Teacher
-        fields = (
-            'education_degree', 'academic_field', 'bio', 'profile_image', 'current_password'
-        )
-
-    def update(self, instance, validated_data):
-        # check_password روی User
-        current_password = validated_data.pop('current_password', None)
-        user = instance.user
-        if current_password and not check_password(current_password, user.password):
-            raise serializers.ValidationError({"current_password": "Current password is incorrect."})
-
-        # update Teacher fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
-
-# -------------------- Student Update Profile --------------------
-class StudentUpdateProfileSerializer(BaseUpdateProfileSerializer):
     class Meta:
         model = User
-        fields = (
-            'first_name', 'last_name', 'email', 'birthday_date', 'national_id',
-            'gender', 'fathers_name', 'education_level', 'profile_image', 'current_password'
-        )
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'birthday_date',
+            'national_id', 'gender', 'fathers_name', 'education_level', 'profile_image',
+            'selected_courses'
+        ]
 
-# -------------------- Course Serializer --------------------
+    def get_selected_courses(self, obj):
+        invoices = Invoice.objects.filter(student=obj)
+        return [invoice.course.title for invoice in invoices]
+
+class StudentUpdateProfileSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField(required=False)  
+
+    class Meta:
+        model = User
+        fields = [
+            'first_name', 'last_name', 'birthday_date',
+            'national_id', 'gender', 'fathers_name', 'education_level', 'profile_image'
+        ]
+
+class TeacherUpdateProfileSerializer(serializers.ModelSerializer):
+    profile_image = serializers.ImageField(required=False)
+
+    class Meta:
+        model = Teacher
+        fields = ['education_degree', 'academic_field', 'bio', 'profile_image']
+
+# -------------------- COURSE SESSION SERIALIZER --------------------
+class CourseSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseSession
+        fields = ['id', 'title', 'description', 'video', 'pdf', 'created_at']
+
+# -------------------- COURSE SERIALIZER --------------------
 class CourseSerializer(serializers.ModelSerializer):
-    teacher_name = serializers.SerializerMethodField()
+    sessions = CourseSessionSerializer(many=True, read_only=True)
+    total_students = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = [
-            'id', 'title', 'teacher_name', 'start_date', 'end_date', 'duration',
-            'cost', 'level', 'category', 'tags', 'description', 'short_description',
-            'is_active', 'limit_students', 'discount_price'
+            'id', 'title', 'description', 'short_description', 'category', 'level',
+            'cost', 'discount_price', 'logo', 'tags', 'requirements',
+            'teacher', 'sessions', 'total_students', 'start_date', 'end_date',
+            'limit_students', 'rating_avg'
         ]
 
-    def get_teacher_name(self, obj):
-        return f"{obj.teacher.user.first_name} {obj.teacher.user.last_name}"
+    def get_total_students(self, obj):
+        return obj.invoices.count()
 
+# -------------------- INVOICE SERIALIZER --------------------
+class InvoiceSerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField()
+    course_title = serializers.CharField(source='course.title', read_only=True)
 
-# -------------------- Teacher Serializer --------------------
+    class Meta:
+        model = Invoice
+        fields = ['id', 'student', 'student_name', 'course', 'course_title', 'paid', 'grade', 'score', 'date_time']
+
+    def get_student_name(self, obj):
+        return f"{obj.student.first_name} {obj.student.last_name}"
+
+# -------------------- TEACHER SERIALIZER --------------------
 class TeacherSerializer(serializers.ModelSerializer):
-    user_name = serializers.SerializerMethodField()
+    user = UserProfileSerializer()
 
     class Meta:
         model = Teacher
-        fields = ['id', 'user_name', 'education_degree', 'academic_field', 'bio', 'profile_image']
-
-    def get_user_name(self, obj):
-        return f"{obj.user.first_name} {obj.user.last_name}"
-
-
-# -------------------- User Profile Serializer --------------------
-class UserProfileSerializer(serializers.ModelSerializer):
-    courses = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = [
-            'id', 'first_name', 'last_name', 'email', 'birthday_date', 'national_id',
-            'gender', 'fathers_name', 'education_level', 'profile_image', 'courses'
-        ]
-
-    def get_courses(self, obj):
-        invoices = Invoice.objects.filter(student=obj)
-        return CourseSerializer([invoice.course for invoice in invoices], many=True).data
-    
-    
-# this is for admin side to editing the user filds    
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        #for CRUD actions on admin side
-        fields = '__all__'
+        fields = ['id', 'user', 'education_degree', 'academic_field', 'bio', 'profile_image']
