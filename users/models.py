@@ -24,6 +24,13 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
     USERNAME_FIELD = 'username'
 
+
+    @property
+    def popularity(self): # this is for rating avrage calculating but there is no output of that yet.
+        return self.received_comments.filter(status='approved').aggregate(
+            avg_rating=models.Avg('rating')
+        )['avg_rating'] or 0
+
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.email})"
 

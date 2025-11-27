@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import check_password
 from users.models import User, Course
-from .models import AdminProfile, Gallery
+from .models import AdminProfile, Gallery,Comment
 from django.contrib.auth.password_validation import validate_password
 
 class AdminLoginSerializer(serializers.Serializer):
@@ -54,3 +54,25 @@ class AdminCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = '__all__' 
+
+
+# -------------------- Comment --------------------
+class CommentSerializer(serializers.ModelSerializer):
+
+    student_name = serializers.CharField(source="student.get_full_name", read_only=True)
+    author_name = serializers.CharField(source="author.get_full_name", read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'student',
+            'student_name',
+            'author',
+            'author_name',
+            'text',
+            'rating',
+            'status',
+            'created_at'
+        ]
+        read_only_fields = ['created_at']

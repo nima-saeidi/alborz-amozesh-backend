@@ -44,3 +44,20 @@ class Gallery(models.Model):
 
     def __str__(self):
         return f"{self.title} ({'Published' if self.is_published else 'Draft'})"
+
+# -------------------- Commnet --------------------
+class Comment(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        APPROVED = 'approved', 'Approved'
+        REJECTED = 'rejected', 'Rejected'
+        
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_comments')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.SET_NULL,null=True,blank=True,related_name='written_comments')
+    text = models.TextField()
+    rating = models.PositiveSmallIntegerField(default=5)
+    status = models.CharField(max_length=10,choices=Status.choices,default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.student} ({self.status})"
