@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
-from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer, AdminCourseSerializer
+from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer, AdminCourseSerializer, CommentSerializer
 from users.serializers import CourseSerializer, UserSerializer, Course
 from django.contrib.auth import get_user_model
 from .permissions import IsSuperAdmin, HasAdminLevel
-from .models import Gallery, AdminProfile
+from .models import Gallery, AdminProfile, Comment
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
 
@@ -72,7 +72,7 @@ class AdminRegisterAPIView(generics.CreateAPIView):
 
 
 # ---------------------- Gallery (CRUD) ----------------------
-class GalleryViewSet(viewsets.ModelViewSet):
+class AdminGalleryViewSet(viewsets.ModelViewSet):
     queryset = Gallery.objects.all()
     serializer_class = GallerySerializer
     permission_classes = [HasAdminLevel.level(1)]
@@ -81,7 +81,7 @@ class GalleryViewSet(viewsets.ModelViewSet):
         serializer.save(uploaded_by=self.request.user)
 
 # ---------------------- Course (CRUD) ----------------------
-class CourseViewSet(viewsets.ModelViewSet):
+class AdminCourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = AdminCourseSerializer
     permission_classes = [HasAdminLevel.level(4)]
@@ -93,3 +93,26 @@ class AdminUserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [HasAdminLevel.level(5)] #superadmin
+    
+# -------------------- Comment (CRUD) --------------------
+class AdminCommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all().order_by('-created_at')
+    serializer_class = CommentSerializer
+    pagination_class = StandardResultsSetPagination
+    permission_classes = [HasAdminLevel.level(4)] 
+
+    # to filter the output of comments
+    def get_queryset(self):
+        qs = super().get_queryset()
+        status = self.request.query_params.get('status')
+        student = self.request.query_params.get('student')
+        author = self.request.query_params.get('author')
+
+        if status:
+            qs = qs.filter(status=status)
+        if student:
+            qs = qs.filter(student_id=student)
+        if author:
+            qs = qs.filter(author_id=author)
+
+        return qs
