@@ -4,12 +4,13 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
 from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer, AdminCourseSerializer
-from users.serializers import CourseSerializer, UserSerializer, Course
+from users.serializers import UserProfileSerializer, CourseSerializer
 from django.contrib.auth import get_user_model
 from .permissions import IsSuperAdmin, HasAdminLevel
 from .models import Gallery, AdminProfile
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
+from users.models import Course
 
 User = get_user_model()
 
@@ -81,15 +82,16 @@ class GalleryViewSet(viewsets.ModelViewSet):
         serializer.save(uploaded_by=self.request.user)
 
 # ---------------------- Course (CRUD) ----------------------
+
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = AdminCourseSerializer
     permission_classes = [HasAdminLevel.level(4)]
-    
+
         
 # ---------------------- User (CRUD) ----------------------
 class AdminUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by('id')
-    serializer_class = UserSerializer
+    serializer_class = UserProfileSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [HasAdminLevel.level(5)] #superadmin

@@ -3,45 +3,51 @@ from .views import (
     RegisterAPIView,
     TeacherRegisterAPIView,
     LoginAPIView,
-    UpdateProfileAPIView,
-    SelectCourseAPIView,
-    RemoveCourseAPIView,
-    ListCoursesAPIView,
-    ListTeachersAPIView,
+    UpdateProfileInfoAPIView,     # آپدیت اطلاعات تکمیلی
+    UpdateCredentialsAPIView,     # آپدیت ایمیل و پسورد
     UserProfileAPIView,
+    ListCoursesAPIView,
+    CourseDetailAPIView,
+    CourseSessionListAPIView,
+    EnrollCourseAPIView,
+    RemoveCourseAPIView,
+    StudentInvoiceListAPIView,
+    TeacherCoursesListAPIView,
+    TeacherCourseDetailAPIView,
+    TeacherCourseStudentsAPIView,
+    TeacherCourseCreateAPIView,
+    TeacherCourseUpdateAPIView,
+    TeacherCourseDeleteAPIView,
 )
 
 urlpatterns = [
-    # --------------------
-    # User Registration
-    # --------------------
-    path('api/users/register/student/', RegisterAPIView.as_view(), name='register-student'),  # Register a student
-    path('api/users/register/teacher/', TeacherRegisterAPIView.as_view(), name='register-teacher'),  # Register a teacher
+    # -------------------- AUTH --------------------
+    path('auth/register/', RegisterAPIView.as_view(), name='user-register'),
+    path('auth/teacher-register/', TeacherRegisterAPIView.as_view(), name='teacher-register'),
+    path('auth/login/', LoginAPIView.as_view(), name='login'),
 
-    # --------------------
-    # User Login
-    # --------------------
-    path('api/users/login/', LoginAPIView.as_view(), name='login'),  # Login user (student or teacher)
+    # -------------------- PROFILE --------------------
+    path('profile/', UserProfileAPIView.as_view(), name='user-profile'),
+    path('profile/update/', UpdateProfileInfoAPIView.as_view(), name='update-profile'),  # آپدیت سایر اطلاعات
+    path('profile/update/credentials/', UpdateCredentialsAPIView.as_view(), name='update-credentials'),  # آپدیت ایمیل و پسورد
 
-    # --------------------
-    # Profile Management
-    # --------------------
-    path('api/users/profile/update/', UpdateProfileAPIView.as_view(), name='update-profile'),  # Update user or teacher profile
+    # -------------------- COURSES --------------------
+    path('courses/', ListCoursesAPIView.as_view(), name='list-courses'),
+    path('courses/<int:id>/', CourseDetailAPIView.as_view(), name='course-detail'),
 
-    # --------------------
-    # Course Selection (for testing purposes)
-    # --------------------
-    path('api/users/courses/select/', SelectCourseAPIView.as_view(), name='select-course'),  # Select a course
-    path('api/users/courses/remove/', RemoveCourseAPIView.as_view(), name='remove-course'),  # Remove a course
+    # -------------------- COURSE SESSIONS --------------------
+    path('courses/<int:course_id>/sessions/', CourseSessionListAPIView.as_view(), name='course-sessions'),
 
-    # --------------------
-    # List all courses and teachers
-    # --------------------
-    path('api/courses/', ListCoursesAPIView.as_view(), name='list-courses'),  # List all available courses
-    path('api/teachers/', ListTeachersAPIView.as_view(), name='list-teachers'),  # List all teachers
+    # -------------------- STUDENT COURSE MANAGEMENT --------------------
+    path('student/enroll/', EnrollCourseAPIView.as_view(), name='enroll-course'),
+    path('student/remove/', RemoveCourseAPIView.as_view(), name='remove-course'),
+    path('student/invoices/', StudentInvoiceListAPIView.as_view(), name='student-invoices'),
 
-    # --------------------
-    # User Profile with Selected Courses
-    # --------------------
-    path('api/users/profile/', UserProfileAPIView.as_view(), name='user-profile'),  # Retrieve user profile with selected courses
+    # -------------------- TEACHER COURSE MANAGEMENT --------------------
+    path('teacher/courses/', TeacherCoursesListAPIView.as_view(), name='teacher-courses'),
+    path('teacher/courses/create/', TeacherCourseCreateAPIView.as_view(), name='teacher-course-create'),
+    path('teacher/courses/<int:course_id>/', TeacherCourseDetailAPIView.as_view(), name='teacher-course-detail'),
+    path('teacher/courses/<int:course_id>/update/', TeacherCourseUpdateAPIView.as_view(), name='teacher-course-update'),
+    path('teacher/courses/<int:course_id>/delete/', TeacherCourseDeleteAPIView.as_view(), name='teacher-course-delete'),
+    path('teacher/courses/<int:course_id>/students/', TeacherCourseStudentsAPIView.as_view(), name='teacher-course-students'),
 ]
