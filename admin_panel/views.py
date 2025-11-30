@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
-from .serializers import AdminLoginSerializer, AdminRegisterSerializer, GallerySerializer, AdminCourseSerializer, CommentSerializer
+from .serializers import AdminLoginSerializer, AdminRegisterSerializer, BannerSerializer, GallerySerializer, AdminCourseSerializer, CommentSerializer
 from users.serializers import CourseSerializer, UserProfileSerializer, Course
 from django.contrib.auth import get_user_model
 from .permissions import IsSuperAdmin, HasAdminLevel
-from .models import Gallery, AdminProfile, Comment
+from .models import Banner, Gallery, AdminProfile, Comment
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
 from users.models import Course
@@ -115,5 +115,25 @@ class AdminCommentViewSet(viewsets.ModelViewSet):
             qs = qs.filter(student_id=student)
         if author:
             qs = qs.filter(author_id=author)
+
+        return qs
+
+
+# -------------------- Banner (CRUD) --------------------
+class AdminBannerViewSet(viewsets.ModelViewSet):
+    queryset = Banner.objects.all().order_by('priority')
+    serializer_class = BannerSerializer
+    pagination_class = StandardResultsSetPagination
+    permission_classes = [HasAdminLevel.level(4)]
+    
+    ## to filter the output of Banner
+    def get_queryset(self):
+        qs = super().get_queryset()
+        active = self.request.query_params.get('active')
+
+        if active == "true":
+            qs = qs.filter(is_active=True)
+        elif active == "false":
+            qs = qs.filter(is_active=False)
 
         return qs
