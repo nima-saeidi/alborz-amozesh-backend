@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import check_password
 from users.models import User, Course
-from .models import AdminProfile, Gallery,Comment, Banner
+from .models import AdminProfile, Gallery,Comment, Banner, Partner
 from django.contrib.auth.password_validation import validate_password
 
 class AdminLoginSerializer(serializers.Serializer):
@@ -95,3 +95,9 @@ class BannerSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at']
 
+# ---------- Partner (Our Collaborators) ----------
+class PartnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Partner
+        fields = ['id', 'title', 'logo', 'description', 'link', 'priority', 'is_active', 'created_at']
+        read_only_fields = ['created_at']

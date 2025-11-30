@@ -75,3 +75,19 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.title
+
+# ---------------- Our Collaborators ----------------
+class Partner(models.Model):
+    title = models.CharField(max_length=255)
+    logo = models.ImageField(upload_to='partners/')
+    description = models.TextField(null=True, blank=True)
+    link = models.URLField(null=True, blank=True)
+    priority = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['priority', '-created_at']
+
+    def __str__(self):
+        return self.title
