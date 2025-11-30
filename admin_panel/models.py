@@ -61,3 +61,17 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author} on {self.student} ({self.status})"
+
+# -------------------- Banner --------------------
+class Banner(models.Model):
+    title = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='banners/')
+    priority = models.PositiveIntegerField(default=1)
+    link = models.URLField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
