@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
-from .serializers import AdminLoginSerializer, AdminRegisterSerializer, BannerSerializer, GallerySerializer, AdminCourseSerializer, CommentSerializer
+from .serializers import AdminLoginSerializer, AdminRegisterSerializer, BannerSerializer, GallerySerializer, AdminCourseSerializer, CommentSerializer, PartnerSerializer
 from users.serializers import CourseSerializer, UserProfileSerializer, Course
 from django.contrib.auth import get_user_model
 from .permissions import IsSuperAdmin, HasAdminLevel
-from .models import Banner, Gallery, AdminProfile, Comment
+from .models import Banner, Gallery, AdminProfile, Comment, Partner
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
 from users.models import Course
@@ -135,5 +135,22 @@ class AdminBannerViewSet(viewsets.ModelViewSet):
             qs = qs.filter(is_active=True)
         elif active == "false":
             qs = qs.filter(is_active=False)
+
+        return qs
+    
+# ---------------- Our Collaborators ----------------
+class AdminPartnerViewSet(viewsets.ModelViewSet):
+    queryset = Partner.objects.all().order_by('priority', '-created_at')
+    serializer_class = PartnerSerializer
+    permission_classes = [HasAdminLevel.level(4)]
+
+    # to filter the output of partner
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        is_active = self.request.query_params.get('is_active')
+        
+        if is_active in ["true", "false"]:
+            qs = qs.filter(is_active=is_active == "true")
 
         return qs
