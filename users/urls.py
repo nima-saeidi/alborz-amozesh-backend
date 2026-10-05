@@ -18,6 +18,7 @@ from .views import (
     TeacherCourseCreateAPIView,
     TeacherCourseUpdateAPIView,
     TeacherCourseDeleteAPIView,
+    PublicBannerListAPIView
 )
 
 urlpatterns = [
@@ -50,4 +51,8 @@ urlpatterns = [
     path('teacher/courses/<int:course_id>/update/', TeacherCourseUpdateAPIView.as_view(), name='teacher-course-update'),
     path('teacher/courses/<int:course_id>/delete/', TeacherCourseDeleteAPIView.as_view(), name='teacher-course-delete'),
     path('teacher/courses/<int:course_id>/students/', TeacherCourseStudentsAPIView.as_view(), name='teacher-course-students'),
+    # -------------------- TEACHER COURSE MANAGEMENT --------------------
+
+    path('banners/', PublicBannerListAPIView.as_view(), name='public-banners'),
+
 ]

@@ -98,9 +98,11 @@ class CourseSessionSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'video', 'pdf', 'created_at']
 
 # -------------------- COURSE SERIALIZER --------------------
+# -------------------- COURSE SERIALIZER --------------------
 class CourseSerializer(serializers.ModelSerializer):
     sessions = CourseSessionSerializer(many=True, read_only=True)
     total_students = serializers.SerializerMethodField()
+    teacher = serializers.ReadOnlyField(source='teacher.id')  
 
     class Meta:
         model = Course
@@ -113,7 +115,6 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_total_students(self, obj):
         return obj.invoices.count()
-
 # -------------------- INVOICE SERIALIZER --------------------
 class InvoiceSerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()

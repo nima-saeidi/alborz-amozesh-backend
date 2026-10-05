@@ -23,6 +23,8 @@ from .serializers import (
     CourseSessionSerializer,
     InvoiceSerializer,
 )
+from admin_panel.models import Banner
+from admin_panel.serializers import BannerSerializer
 
 from rest_framework.permissions import BasePermission
 
@@ -264,3 +266,17 @@ class TeacherCourseDeleteAPIView(generics.DestroyAPIView):
     def perform_destroy(self, instance):
         instance.sessions.all().delete()
         instance.delete()
+        
+# -------------------- Show Banners --------------------
+
+class PublicBannerListAPIView(generics.ListAPIView):
+    serializer_class = BannerSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        now = timezone.now().date()
+        return Banner.objects.filter(
+            is_active=True,
+            start_date__lte=now,
+            end_date__gte=now
+        ).order_by('priority')
