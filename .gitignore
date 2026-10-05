@@ -27,3 +27,6 @@ Thumbs.db
 
 # Migrations cache
 **/migrations/__pycache__/
+
+# Compiled admin translations are committed (the server has no gettext tools)
+!locale/fa/LC_MESSAGES/django.mo
