@@ -98,7 +98,6 @@ class CourseSessionSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'video', 'pdf', 'created_at']
 
 # -------------------- COURSE SERIALIZER --------------------
-# -------------------- COURSE SERIALIZER --------------------
 class CourseSerializer(serializers.ModelSerializer):
     sessions = CourseSessionSerializer(many=True, read_only=True)
     total_students = serializers.SerializerMethodField()

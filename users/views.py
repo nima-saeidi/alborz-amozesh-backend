@@ -274,9 +274,10 @@ class PublicBannerListAPIView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        now = timezone.now().date()
+        # start_date / end_date are optional: an empty date means no limit
+        now = timezone.now()
         return Banner.objects.filter(
-            is_active=True,
-            start_date__lte=now,
-            end_date__gte=now
+            Q(start_date__isnull=True) | Q(start_date__lte=now),
+            Q(end_date__isnull=True) | Q(end_date__gte=now),
+            is_active=True
         ).order_by('priority')
