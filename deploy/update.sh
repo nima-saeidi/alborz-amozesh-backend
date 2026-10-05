@@ -3,7 +3,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 git pull --ff-only origin main
-./venv/bin/pip install -q -r requirements.txt
+# files.pythonhosted.org is not reachable from the server: packages come from /srv/alborz-wheels
+# (download new ones with: pip download -r requirements.txt --platform manylinux2014_x86_64 --python-version 3.14 --only-binary=:all: -d wheels)
+./venv/bin/pip install -q --no-index --find-links /srv/alborz-wheels -r requirements.txt
 ./venv/bin/python manage.py migrate --noinput
 ./venv/bin/python manage.py collectstatic --noinput -v 0
 sudo systemctl restart alborz-backend
