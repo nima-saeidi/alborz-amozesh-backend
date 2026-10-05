@@ -26,6 +26,10 @@ AUTH_USER_MODEL = 'users.User'
 
 # -------------------- APPS --------------------
 INSTALLED_APPS = [
+    # Admin theme (must be before django.contrib.admin)
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -106,6 +110,8 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'fa'
 LANGUAGES = [('fa', 'فارسی'), ('en', 'English')]
 TIME_ZONE = 'Asia/Tehran'
+# Project translations (Persian texts for the admin theme)
+LOCALE_PATHS = [BASE_DIR / 'locale']
 USE_I18N = True
 USE_TZ = True
 
@@ -172,6 +178,10 @@ SESSION_COOKIE_SECURE = env.bool('SECURE_COOKIES', default=not DEBUG)
 CSRF_COOKIE_SECURE = env.bool('SECURE_COOKIES', default=not DEBUG)
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+
+# -------------------- ADMIN THEME --------------------
+from config.unfold import UNFOLD  # noqa: E402,F401
 
 
 # -------------------- LOGGING --------------------

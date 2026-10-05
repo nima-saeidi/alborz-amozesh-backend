@@ -1,0 +1,340 @@
+# Persian texts for the django-unfold admin theme (compiled to django.mo)
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: fa\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Add"
+msgstr "افزودن"
+
+msgid "Add row"
+msgstr "افزودن ردیف"
+
+msgid "All"
+msgstr "همه"
+
+msgid "All applications"
+msgstr "همه بخش‌ها"
+
+msgid "Apply Filters"
+msgstr "اعمال فیلترها"
+
+msgid "Available shortcuts"
+msgstr "میان‌برهای موجود"
+
+msgid "Cancel"
+msgstr "انصراف"
+
+msgid "Change"
+msgstr "ویرایش"
+
+msgid "Change password"
+msgstr "تغییر گذرواژه"
+
+msgid "Changelist shortcuts"
+msgstr "میان‌برهای فهرست"
+
+msgid "Choose file to upload"
+msgstr "انتخاب فایل برای آپلود"
+
+msgid "Clear"
+msgstr "پاک کردن"
+
+msgid "Clear all filters"
+msgstr "پاک کردن همه فیلترها"
+
+msgid "Clear selection"
+msgstr "لغو انتخاب"
+
+msgid "Click here to select the objects across all pages"
+msgstr "برای انتخاب موارد همه صفحات اینجا کلیک کنید"
+
+msgid "Click to cancel"
+msgstr "برای لغو کلیک کنید"
+
+msgid "Click to download"
+msgstr "برای دانلود کلیک کنید"
+
+msgid "Close"
+msgstr "بستن"
+
+msgid "Command tool shortcuts"
+msgstr "میان‌برهای جستجوی سریع"
+
+msgid "Create new record"
+msgstr "ایجاد مورد جدید"
+
+msgid "Dark"
+msgstr "تیره"
+
+msgid "Dataset not found. No action performed."
+msgstr "داده‌ای پیدا نشد. کاری انجام نشد."
+
+msgid "Date"
+msgstr "تاریخ"
+
+msgid "Date from"
+msgstr "از تاریخ"
+
+msgid "Date to"
+msgstr "تا تاریخ"
+
+msgid "Date/time"
+msgstr "تاریخ و زمان"
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "False"
+msgstr "خیر"
+
+msgid "Filters"
+msgstr "فیلترها"
+
+msgid "Forgotten your password or username?"
+msgstr "گذرواژه یا نام کاربری را فراموش کرده‌اید؟"
+
+msgid "From"
+msgstr "از"
+
+msgid "General"
+msgstr "اطلاعات اصلی"
+
+msgid "Global shortcuts"
+msgstr "میان‌برهای عمومی"
+
+msgid "Go back"
+msgstr "بازگشت"
+
+msgid "Hide counts"
+msgstr "پنهان کردن تعداد"
+
+msgid "History"
+msgstr "تاریخچه"
+
+msgid "Home"
+msgstr "خانه"
+
+msgid "Image preview"
+msgstr "پیش‌نمایش تصویر"
+
+msgid "Light"
+msgstr "روشن"
+
+msgid "Log in"
+msgstr "ورود"
+
+msgid "Log in again"
+msgstr "ورود دوباره"
+
+msgid "Log out"
+msgstr "خروج"
+
+msgid "Navigate"
+msgstr "پیمایش"
+
+msgid "Next"
+msgstr "بعدی"
+
+msgid "No"
+msgstr "خیر"
+
+msgid "No data"
+msgstr "داده‌ای وجود ندارد"
+
+msgid "No results found"
+msgstr "نتیجه‌ای پیدا نشد"
+
+msgid "No, take me back"
+msgstr "نه، برگرد"
+
+msgid "Nothing matched your search"
+msgstr "چیزی با جستجوی شما پیدا نشد"
+
+msgid "Objects"
+msgstr "موارد"
+
+msgid "Open command tool"
+msgstr "باز کردن جستجوی سریع"
+
+msgid "Open selection"
+msgstr "باز کردن مورد انتخاب‌شده"
+
+msgid "Open selection in new tab"
+msgstr "باز کردن در زبانه جدید"
+
+msgid "Open shortcuts list"
+msgstr "فهرست میان‌برها"
+
+msgid "Please correct the error below."
+msgstr "لطفاً خطای زیر را برطرف کنید."
+
+msgid "Previous"
+msgstr "قبلی"
+
+msgid "Recent actions"
+msgstr "فعالیت‌های اخیر"
+
+msgid "Recent searches"
+msgstr "جستجوهای اخیر"
+
+msgid "Record picture"
+msgstr "تصویر"
+
+msgid "Remove from sorting"
+msgstr "حذف از مرتب‌سازی"
+
+msgid "Reset filters"
+msgstr "بازنشانی فیلترها"
+
+msgid "Return to site"
+msgstr "بازگشت به سایت"
+
+msgid "Run"
+msgstr "اجرا"
+
+msgid "Run the selected action"
+msgstr "اجرای عملیات انتخاب‌شده"
+
+msgid "Save"
+msgstr "ذخیره"
+
+msgid "Save and add another"
+msgstr "ذخیره و ایجاد یکی دیگر"
+
+msgid "Save and continue editing"
+msgstr "ذخیره و ادامه ویرایش"
+
+msgid "Save and view"
+msgstr "ذخیره و مشاهده"
+
+msgid "Save as new"
+msgstr "ذخیره به عنوان جدید"
+
+msgid "Search apps and models..."
+msgstr "جستجو در بخش‌ها..."
+
+msgid "Select"
+msgstr "انتخاب"
+
+msgid "Select action"
+msgstr "انتخاب عملیات"
+
+msgid "Select action to run"
+msgstr "عملیات مورد نظر را انتخاب کنید"
+
+msgid "Select currency"
+msgstr "انتخاب واحد پول"
+
+msgid "Select format"
+msgstr "انتخاب قالب"
+
+msgid "Select record"
+msgstr "انتخاب مورد"
+
+msgid "Select value"
+msgstr "انتخاب مقدار"
+
+msgid "Show all"
+msgstr "نمایش همه"
+
+msgid "Show counts"
+msgstr "نمایش تعداد"
+
+msgid "Submit"
+msgstr "ثبت"
+
+msgid "Summary"
+msgstr "خلاصه"
+
+msgid "System"
+msgstr "سیستم"
+
+msgid "Thanks for spending some quality time with the web site today."
+msgstr "از اینکه امروز وقت گذاشتید سپاسگزاریم."
+
+msgid "This item will be deleted."
+msgstr "این مورد حذف خواهد شد."
+
+msgid "This object doesn’t have a change history. It probably wasn’t added via this admin site."
+msgstr "این مورد تاریخچه تغییرات ندارد. احتمالاً از طریق این پنل اضافه نشده است."
+
+msgid "This page yielded into no results. Create a new item or reset your filters."
+msgstr "موردی برای نمایش وجود ندارد. یک مورد جدید بسازید یا فیلترها را بازنشانی کنید."
+
+msgid "Time"
+msgstr "زمان"
+
+msgid "To"
+msgstr "تا"
+
+msgid "Toggle dark/light mode"
+msgstr "تغییر حالت تیره / روشن"
+
+msgid "Toggle filter"
+msgstr "نمایش / پنهان کردن فیلتر"
+
+msgid "Toggle password visibility"
+msgstr "نمایش / پنهان کردن گذرواژه"
+
+msgid "Toggle sidebar"
+msgstr "نمایش / پنهان کردن منو"
+
+msgid "Toggle sorting"
+msgstr "تغییر مرتب‌سازی"
+
+msgid "True"
+msgstr "بله"
+
+msgid "Type to search"
+msgstr "برای جستجو تایپ کنید"
+
+msgid "Unknown"
+msgstr "نامشخص"
+
+msgid "Unknown content"
+msgstr "محتوای نامشخص"
+
+msgid "User"
+msgstr "کاربر"
+
+msgid "Value"
+msgstr "مقدار"
+
+msgid "View"
+msgstr "مشاهده"
+
+msgid "View on site"
+msgstr "مشاهده در سایت"
+
+msgid "View site"
+msgstr "مشاهده سایت"
+
+msgid "Welcome"
+msgstr "خوش آمدید"
+
+msgid "Welcome back to"
+msgstr "خوش آمدید به"
+
+msgid "Yes"
+msgstr "بله"
+
+msgid "Yes, I’m sure"
+msgstr "بله، مطمئنم"
+
+msgid "You can not create nested object without parent"
+msgstr "بدون مورد اصلی نمی‌توان زیرمجموعه ساخت"
+
+msgid "You don’t have permission to view or edit anything."
+msgstr "شما اجازه مشاهده یا ویرایش هیچ بخشی را ندارید."
+
+msgid "You have been successfully logged out from the administration"
+msgstr "با موفقیت از پنل مدیریت خارج شدید"
+
+msgid "Your password was changed."
+msgstr "گذرواژه شما تغییر کرد."
+
+msgid "and"
+msgstr "و"
+
