@@ -1,0 +1,19 @@
+[Unit]
+Description=Alborz backend (gunicorn)
+After=network.target postgresql.service
+
+[Service]
+User=alborz
+Group=www-data
+WorkingDirectory=/srv/alborz-backend
+EnvironmentFile=/srv/alborz-backend/.env
+ExecStart=/srv/alborz-backend/venv/bin/gunicorn config.wsgi:application \
+    --bind unix:/run/alborz-backend/gunicorn.sock \
+    --workers 3 --timeout 300 \
+    --access-logfile - --error-logfile -
+RuntimeDirectory=alborz-backend
+RuntimeDirectoryMode=0755
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

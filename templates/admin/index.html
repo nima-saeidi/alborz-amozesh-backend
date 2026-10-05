@@ -1,0 +1,74 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+{% if dashboard %}
+<div class="alborz-dashboard">
+  <div class="stat-cards">
+    <a class="stat-card" href="{% url 'admin:users_user_changelist' %}?role=student">
+      <span class="stat-label">دانشجویان</span>
+      <span class="stat-value">{{ dashboard.students }}</span>
+      <span class="stat-note">{{ dashboard.new_users }} کاربر جدید در ۳۰ روز اخیر</span>
+    </a>
+    <a class="stat-card" href="{% url 'admin:users_teacher_changelist' %}">
+      <span class="stat-label">اساتید</span>
+      <span class="stat-value">{{ dashboard.teachers }}</span>
+      {% if dashboard.pending_teachers %}<span class="stat-note warn">{{ dashboard.pending_teachers }} استاد در انتظار تایید</span>{% else %}<span class="stat-note">همه تایید شده‌اند</span>{% endif %}
+    </a>
+    <a class="stat-card" href="{% url 'admin:users_course_changelist' %}?is_active__exact=1">
+      <span class="stat-label">دوره‌های فعال</span>
+      <span class="stat-value">{{ dashboard.courses }}</span>
+      <span class="stat-note">مدیریت دوره‌ها و جلسات</span>
+    </a>
+    <a class="stat-card" href="{% url 'admin:users_invoice_changelist' %}?paid__exact=1">
+      <span class="stat-label">درآمد کل</span>
+      <span class="stat-value small">{{ dashboard.revenue }}</span>
+      <span class="stat-note">۳۰ روز اخیر: {{ dashboard.revenue_month }}</span>
+    </a>
+    <a class="stat-card" href="{% url 'admin:users_invoice_changelist' %}?paid__exact=0">
+      <span class="stat-label">فاکتورهای پرداخت نشده</span>
+      <span class="stat-value">{{ dashboard.unpaid_invoices }}</span>
+      <span class="stat-note">ثبت پرداخت از فهرست فاکتورها</span>
+    </a>
+    <a class="stat-card" href="{% url 'admin:admin_panel_comment_changelist' %}?status__exact=pending">
+      <span class="stat-label">نظرات در انتظار</span>
+      <span class="stat-value">{{ dashboard.pending_comments }}</span>
+      <span class="stat-note">تایید یا رد نظرات</span>
+    </a>
+  </div>
+
+  <div class="dash-tables">
+    <div class="module dash-table">
+      <h2>آخرین ثبت‌نام‌ها</h2>
+      <table>
+        <thead><tr><th>دانشجو</th><th>دوره</th><th>وضعیت</th></tr></thead>
+        <tbody>
+        {% for invoice in dashboard.recent_invoices %}
+          <tr>
+            <td><a href="{% url 'admin:users_invoice_change' invoice.id %}">{{ invoice.student.get_full_name|default:invoice.student.email }}</a></td>
+            <td>{{ invoice.course.title }}</td>
+            <td>{% if invoice.paid %}<span class="badge badge-green">پرداخت شده</span>{% else %}<span class="badge badge-orange">در انتظار</span>{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3">هنوز ثبت‌نامی انجام نشده است.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="module dash-table">
+      <h2>پرطرفدارترین دوره‌ها</h2>
+      <table>
+        <thead><tr><th>دوره</th><th>دانشجو</th></tr></thead>
+        <tbody>
+        {% for course in dashboard.top_courses %}
+          <tr><td><a href="{% url 'admin:users_course_change' course.id %}">{{ course.title }}</a></td><td>{{ course.students }}</td></tr>
+        {% empty %}
+          <tr><td colspan="2">هنوز دوره‌ای ثبت نشده است.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}
