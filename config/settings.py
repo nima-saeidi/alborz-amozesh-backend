@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'users',
     'admin_panel',
+    'standards',
 ]
 
 MIDDLEWARE = [
@@ -148,6 +149,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'auth': '20/minute',
+        'otp': '5/minute',
+        'otp_verify': '10/minute',
     },
 }
 
@@ -157,6 +160,23 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# -------------------- SMS / ONE-TIME CODES --------------------
+# console (log only, for development) | kavenegar | smsir
+SMS_BACKEND = env('SMS_BACKEND', default='console')
+KAVENEGAR_API_KEY = env('KAVENEGAR_API_KEY', default='')
+KAVENEGAR_TEMPLATE = env('KAVENEGAR_TEMPLATE', default='verify')
+SMSIR_API_KEY = env('SMSIR_API_KEY', default='')
+SMSIR_TEMPLATE_ID = env('SMSIR_TEMPLATE_ID', default='0')
+OTP_LENGTH = 4
+OTP_TTL_SECONDS = env.int('OTP_TTL_SECONDS', default=180)
+OTP_RESEND_SECONDS = env.int('OTP_RESEND_SECONDS', default=120)
+OTP_MAX_ATTEMPTS = 5
+OTP_MAX_PER_HOUR = env.int('OTP_MAX_PER_HOUR', default=6)
+# Time to finish sign up / password reset after entering a correct code
+OTP_VERIFICATION_MAX_AGE = 15 * 60
+# In DEBUG with the console backend the code is also returned in the API response
+OTP_RETURN_CODE_IN_DEBUG = env.bool('OTP_RETURN_CODE_IN_DEBUG', default=True)
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {

@@ -74,10 +74,25 @@ class AdminUserSerializer(serializers.ModelSerializer):
         return obj.admin_profile.access_level if hasattr(obj, 'admin_profile') else None
 
     def validate_email(self, value):
-        return validate_unique_email(value, _exclude_user=self.instance)
+        return validate_unique_email(value, _exclude_user=self.instance) if value else None
+
+    def validate_phone_number(self, value):
+        from users.phone import normalize_phone
+        if not value:
+            return None
+        phone = normalize_phone(value)
+        if phone is None:
+            raise serializers.ValidationError('شماره موبایل معتبر نیست.')
+        others = User.objects.filter(phone_number=phone)
+        if self.instance is not None:
+            others = others.exclude(pk=self.instance.pk)
+        if others.exists():
+            raise serializers.ValidationError('این شماره برای حساب دیگری ثبت شده است.')
+        return phone
 
     def update(self, instance, validated_data):
-        if 'email' in validated_data:
+        # Accounts made with a mobile number keep it as username
+        if validated_data.get('email') and instance.username == instance.email:
             instance.username = validated_data['email']
         return super().update(instance, validated_data)
 

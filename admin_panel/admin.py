@@ -24,7 +24,7 @@ class AdminProfileAdmin(ModelAdmin):
 
     @display(description='ادمین', header=True, ordering='user__last_name')
     def admin_info(self, obj):
-        return [obj.user.get_full_name() or obj.user.email, obj.user.email, obj.user.first_name[:1] or '?']
+        return [obj.user.get_full_name() or obj.user.contact, obj.user.contact, obj.user.first_name[:1] or '?']
 
     @display(description='سطح دسترسی', ordering='access_level', label=True)
     def level(self, obj):

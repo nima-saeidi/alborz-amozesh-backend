@@ -26,7 +26,7 @@ class AdminProfile(models.Model):
         verbose_name_plural = 'ادمین‌ها'
 
     def __str__(self):
-        return f"{self.user.get_full_name() or self.user.email} ({self.get_access_level_display()})"
+        return f"{self.user.get_full_name() or self.user.contact} ({self.get_access_level_display()})"
 
 
 # -------------------- GALLERY --------------------

@@ -1,6 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from standards.views import AdminStandardViewSet, AdminStandardCategoryViewSet
+
 from .views import (
     AdminRegisterAPIView,
     AdminLoginAPIView,
@@ -27,6 +29,8 @@ router.register(r'gallery', AdminGalleryViewSet, basename='admin-gallery')
 router.register(r'comment', AdminCommentViewSet, basename='admin-comment')
 router.register(r'banner', AdminBannerViewSet, basename='admin-banner')
 router.register(r'partner', AdminPartnerViewSet, basename='admin-partner')
+router.register(r'standards', AdminStandardViewSet, basename='admin-standards')
+router.register(r'standard-categories', AdminStandardCategoryViewSet, basename='admin-standard-categories')
 
 # Mounted under /api/admin/
 urlpatterns = [

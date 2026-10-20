@@ -5,7 +5,9 @@ from django.db import models
 # -------------------- USER --------------------
 class User(AbstractUser):
     """
-    Base user (students, teachers and admins). The email is the login identifier.
+    Base user (students, teachers and admins).
+    Students sign up with their mobile number (verified by SMS) and log in with mobile + password;
+    email + password login is kept for admins and older accounts.
     """
     class Gender(models.TextChoices):
         MALE = 'male', 'مرد'
@@ -13,13 +15,13 @@ class User(AbstractUser):
 
     birthday_date = models.DateField('تاریخ تولد', null=True, blank=True)
     national_id = models.CharField('کد ملی', max_length=20, null=True, blank=True)
-    phone_number = models.CharField('شماره موبایل', max_length=20, null=True, blank=True)
+    phone_number = models.CharField('شماره موبایل', max_length=20, unique=True, null=True, blank=True)
     gender = models.CharField('جنسیت', max_length=10, choices=Gender.choices, null=True, blank=True)
     fathers_name = models.CharField('نام پدر', max_length=100, null=True, blank=True)
     education_level = models.CharField('تحصیلات', max_length=100, null=True, blank=True)
     profile_image = models.ImageField('تصویر پروفایل', upload_to='profile_images/', null=True, blank=True)
 
-    email = models.EmailField('ایمیل', unique=True)
+    email = models.EmailField('ایمیل', unique=True, null=True, blank=True)
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name']
     USERNAME_FIELD = 'username'
@@ -27,6 +29,17 @@ class User(AbstractUser):
     class Meta(AbstractUser.Meta):
         verbose_name = 'کاربر'
         verbose_name_plural = 'کاربران'
+
+    def save(self, *args, **kwargs):
+        # Empty strings would break the unique constraints (several users without email / phone)
+        self.email = self.email or None
+        self.phone_number = self.phone_number or None
+        super().save(*args, **kwargs)
+
+    @property
+    def contact(self):
+        """Email or mobile number, for display"""
+        return self.email or self.phone_number or self.username
 
     @property
     def is_teacher(self):
@@ -45,7 +58,7 @@ class User(AbstractUser):
 
     def __str__(self):
         name = self.get_full_name()
-        return f"{name} ({self.email})" if name else self.email
+        return f"{name} ({self.contact})" if name else self.contact
 
 
 # -------------------- TEACHER --------------------
@@ -66,12 +79,17 @@ class Teacher(models.Model):
         verbose_name_plural = 'اساتید'
 
     def __str__(self):
-        return self.user.get_full_name() or self.user.email
+        return self.user.get_full_name() or self.user.contact
 
 
 # -------------------- COURSE --------------------
 class Course(models.Model):
+    class Kind(models.TextChoices):
+        COURSE = 'course', 'دوره'
+        WEBINAR = 'webinar', 'وبینار'
+
     title = models.CharField('عنوان', max_length=200)
+    kind = models.CharField('نوع', max_length=10, choices=Kind.choices, default=Kind.COURSE)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, related_name='courses', verbose_name='استاد')
     start_date = models.DateField('تاریخ شروع', null=True, blank=True)
     end_date = models.DateField('تاریخ پایان', null=True, blank=True)
@@ -150,4 +168,28 @@ class Invoice(models.Model):
         ordering = ['-date_time']
 
     def __str__(self):
-        return f"فاکتور {self.id} - {self.student.email} - {self.course.title}"
+        return f"فاکتور {self.id} - {self.student.contact} - {self.course.title}"
+
+
+# -------------------- PHONE VERIFICATION CODE --------------------
+class PhoneOTP(models.Model):
+    """One-time code sent by SMS (only its hash is stored)"""
+    class Purpose(models.TextChoices):
+        REGISTER = 'register', 'ثبت‌نام'
+        LOGIN = 'login', 'ورود'
+        RESET = 'reset', 'بازیابی رمز عبور'
+
+    phone_number = models.CharField('شماره موبایل', max_length=20, db_index=True)
+    purpose = models.CharField('کاربرد', max_length=10, choices=Purpose.choices)
+    code_hash = models.CharField(max_length=64)
+    attempts = models.PositiveSmallIntegerField('تعداد تلاش', default=0)
+    is_used = models.BooleanField('استفاده شده', default=False)
+    created_at = models.DateTimeField('زمان ارسال', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'کد تایید پیامکی'
+        verbose_name_plural = 'کدهای تایید پیامکی'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.phone_number} ({self.get_purpose_display()})"

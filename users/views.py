@@ -3,8 +3,9 @@ import mimetypes
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import signing
-from django.db import transaction
-from django.db.models import Q, Count
+from django.db import models, transaction
+from django.db.models import Avg, Count, F, Q, Value
+from django.db.models.functions import Coalesce
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -61,6 +62,7 @@ def generate_jwt_response(user):
         'first_name': user.first_name,
         'last_name': user.last_name,
         'email': user.email,
+        'phone_number': user.phone_number,
         'is_teacher': teacher is not None,
         'teacher_approved': bool(teacher and teacher.is_approved),
         'refresh': str(refresh),
@@ -75,6 +77,9 @@ def public_courses():
         .annotate(
             total_students=Count('invoices', filter=Q(invoices__paid=True), distinct=True),
             sessions_count=Count('sessions', distinct=True),
+            reviews_count=Count('comments', filter=Q(comments__status='approved'), distinct=True),
+            rating=Avg('comments__rating', filter=Q(comments__status='approved')),
+            effective_price=Coalesce('discount_price', 'cost', Value(0), output_field=models.DecimalField(max_digits=12, decimal_places=0)),
         )
     )
 
@@ -181,8 +186,10 @@ class UpdateCredentialsAPIView(generics.GenericAPIView):
         if serializer.validated_data.get('new_password'):
             user.set_password(serializer.validated_data['new_password'])
         if serializer.validated_data.get('email'):
+            # Accounts made with a mobile number keep it as username
+            if user.username == user.email:
+                user.username = serializer.validated_data['email']
             user.email = serializer.validated_data['email']
-            user.username = serializer.validated_data['email']
         user.save()
 
         return Response({'detail': 'اطلاعات ورود به‌روزرسانی شد.'}, status=status.HTTP_200_OK)
@@ -193,7 +200,8 @@ class UpdateCredentialsAPIView(generics.GenericAPIView):
 # -------------------- COURSES (public) --------------------
 class ListCoursesAPIView(generics.ListAPIView):
     """
-    Filters: search, category, level, teacher (id)
+    Filters: search, category, level, teacher (id), kind (course | webinar),
+    max_price, free=1 (free only), available=1 (not full)
     ordering: newest (default), oldest, price, -price, popular
     """
     serializer_class = CourseListSerializer
@@ -203,8 +211,8 @@ class ListCoursesAPIView(generics.ListAPIView):
     ORDERINGS = {
         'newest': '-created_at',
         'oldest': 'created_at',
-        'price': 'cost',
-        '-price': '-cost',
+        'price': 'effective_price',
+        '-price': '-effective_price',
         'popular': '-total_students',
     }
 
@@ -228,6 +236,14 @@ class ListCoursesAPIView(generics.ListAPIView):
             queryset = queryset.filter(level__iexact=params['level'])
         if params.get('teacher'):
             queryset = queryset.filter(teacher_id=params['teacher'])
+        if params.get('kind') in Course.Kind.values:
+            queryset = queryset.filter(kind=params['kind'])
+        if params.get('max_price', '').isdigit():
+            queryset = queryset.filter(effective_price__lte=int(params['max_price']))
+        if params.get('free') in ('1', 'true'):
+            queryset = queryset.filter(effective_price=0)
+        if params.get('available') in ('1', 'true'):
+            queryset = queryset.filter(Q(limit_students__isnull=True) | Q(limit_students__gt=F('total_students')))
 
         ordering = self.ORDERINGS.get(params.get('ordering'), '-created_at')
         return queryset.order_by(ordering, '-id')

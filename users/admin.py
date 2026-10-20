@@ -109,9 +109,9 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     list_per_page = 30
     actions = ('activate_users', 'deactivate_users')
     fieldsets = (
-        ('حساب کاربری', {'fields': ('email', 'username', 'password')}),
+        ('حساب کاربری', {'fields': ('phone_number', 'email', 'username', 'password')}),
         ('اطلاعات شخصی', {
-            'fields': ('avatar_large', 'profile_image', ('first_name', 'last_name'), ('phone_number', 'national_id'),
+            'fields': ('avatar_large', 'profile_image', ('first_name', 'last_name'), 'national_id',
                        ('birthday_date', 'gender'), ('fathers_name', 'education_level')),
         }),
         ('دسترسی‌ها', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'), 'classes': ('collapse',)}),
@@ -120,7 +120,7 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'username', 'first_name', 'last_name', 'password1', 'password2'),
+            'fields': ('phone_number', 'email', 'username', 'first_name', 'last_name', 'password1', 'password2'),
         }),
     )
     inlines = [TeacherInline, InvoiceInline]
@@ -130,10 +130,10 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
 
     @display(description='کاربر', header=True, ordering='last_name')
     def user_info(self, obj):
-        initials = obj.first_name[:1] or obj.email[:1].upper()
+        initials = obj.first_name[:1] or obj.contact[:1].upper()
         if obj.profile_image:
-            return [obj.get_full_name() or obj.email, obj.email, None, {'path': obj.profile_image.url, 'squared': False}]
-        return [obj.get_full_name() or obj.email, obj.email, initials]
+            return [obj.get_full_name() or obj.contact, obj.contact, None, {'path': obj.profile_image.url, 'squared': False}]
+        return [obj.get_full_name() or obj.contact, obj.contact, initials]
 
     @display(description='تصویر')
     def avatar_large(self, obj):
@@ -181,8 +181,8 @@ class TeacherAdmin(ModelAdmin):
     def teacher_info(self, obj):
         image = obj.profile_image or obj.user.profile_image
         if image:
-            return [obj.user.get_full_name(), obj.user.email, None, {'path': image.url, 'squared': False}]
-        return [obj.user.get_full_name(), obj.user.email, obj.user.first_name[:1] or '?']
+            return [obj.user.get_full_name(), obj.user.contact, None, {'path': image.url, 'squared': False}]
+        return [obj.user.get_full_name(), obj.user.contact, obj.user.first_name[:1] or '?']
 
     @display(description='تعداد دوره', ordering='_courses')
     def courses_count(self, obj):
@@ -215,7 +215,7 @@ class CourseSessionInline(TabularInline):
 @admin.register(Course)
 class CourseAdmin(ModelAdmin):
     list_display = ('course_info', 'teacher', 'price', 'students_count', 'sessions_count', 'start', 'status', 'is_active')
-    list_filter = ('is_active', 'category', 'level', 'teacher', ('start_date', RangeDateFilter))
+    list_filter = ('is_active', 'kind', 'category', 'level', 'teacher', ('start_date', RangeDateFilter))
     list_filter_submit = True
     list_editable = ('is_active',)
     search_fields = ('title', 'description', 'tags', 'teacher__user__first_name', 'teacher__user__last_name')
@@ -227,7 +227,7 @@ class CourseAdmin(ModelAdmin):
     warn_unsaved_form = True
 
     fieldsets = (
-        ('اطلاعات اصلی', {'fields': ('title', 'teacher', ('category', 'level'), 'tags', 'cover_large', 'logo')}),
+        ('اطلاعات اصلی', {'fields': ('title', ('kind', 'teacher'), ('category', 'level'), 'tags', 'cover_large', 'logo')}),
         ('توضیحات', {'fields': ('short_description', 'description', 'requirements')}),
         ('قیمت و ظرفیت', {'fields': (('cost', 'discount_price'), 'limit_students')}),
         ('زمان‌بندی', {'fields': (('start_date', 'end_date'), ('exam_date', 'duration'))}),
@@ -348,7 +348,7 @@ class InvoiceAdmin(ModelAdmin):
 
     @display(description='دانشجو', header=True, ordering='student__last_name')
     def student_info(self, obj):
-        return [obj.student.get_full_name() or obj.student.email, obj.student.email, obj.student.first_name[:1] or '?']
+        return [obj.student.get_full_name() or obj.student.contact, obj.student.contact, obj.student.first_name[:1] or '?']
 
     @display(description='مبلغ', ordering='amount')
     def amount_display(self, obj):

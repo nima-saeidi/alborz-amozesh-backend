@@ -21,7 +21,20 @@ python manage.py runserver
 
 ## API
 
-### احراز هویت
+### احراز هویت با شماره موبایل (سایت)
+| متد | آدرس | توضیح |
+|---|---|---|
+| POST | `/api/auth/phone/check/` | `phone_number` → `exists`, `has_password` (حساب دارد یا نه) |
+| POST | `/api/auth/otp/send/` | ارسال کد پیامکی — `phone_number, purpose=register\|login\|reset` (ارسال دوباره بعد از ۲ دقیقه) |
+| POST | `/api/auth/otp/verify/` | `phone_number, code, purpose` → برای `login`: توکن‌ها؛ برای `register`/`reset`: `verification_token` (۱۵ دقیقه اعتبار) |
+| POST | `/api/auth/phone/register/` | ساخت حساب: `verification_token, first_name, last_name, password, password2, email?` → توکن‌ها |
+| POST | `/api/auth/phone/login/` | ورود با `phone_number, password` → توکن‌ها |
+| POST | `/api/auth/password/reset/` | رمز جدید: `verification_token, password, password2` → توکن‌ها |
+
+شماره با ارقام فارسی، `+98` و `0098` هم پذیرفته و به شکل `09xxxxxxxxx` ذخیره می‌شود. هر کد ۳ دقیقه اعتبار و حداکثر ۵ بار تلاش دارد.
+پیامک با `SMS_BACKEND` در `.env` تعیین می‌شود: `console` (فقط در لاگ؛ در حالت DEBUG کد در پاسخ API هم برمی‌گردد)، `kavenegar` (`KAVENEGAR_API_KEY`, `KAVENEGAR_TEMPLATE`) یا `smsir` (`SMSIR_API_KEY`, `SMSIR_TEMPLATE_ID`؛ نام پارامتر قالب: `Code`).
+
+### احراز هویت با ایمیل (ادمین‌ها و حساب‌های قدیمی)
 | متد | آدرس | توضیح |
 |---|---|---|
 | POST | `/api/auth/register/` | ثبت‌نام دانشجو (`first_name, last_name, email, password, password2, phone_number?`) |
@@ -40,7 +53,7 @@ python manage.py runserver
 ### عمومی (بدون لاگین)
 | متد | آدرس | توضیح |
 |---|---|---|
-| GET | `/api/courses/` | لیست دوره‌ها — `search, category, level, teacher, ordering=newest\|oldest\|price\|-price\|popular, page, page_size` |
+| GET | `/api/courses/` | لیست دوره‌ها — `search, category, level, teacher, kind=course\|webinar, max_price, free=1, available=1, ordering=newest\|oldest\|price\|-price\|popular, page, page_size`؛ هر دوره `kind`، `rating` (میانگین نظرات تاییدشده) و `reviews_count` دارد |
 | GET | `/api/courses/categories/` | دسته‌بندی‌ها با تعداد |
 | GET | `/api/courses/<id>/` | جزئیات دوره + جلسات (+ `is_enrolled`, `is_paid` برای کاربر لاگین) |
 | GET | `/api/courses/<id>/sessions/` | جلسات دوره |
@@ -49,6 +62,16 @@ python manage.py runserver
 | GET/POST | `/api/comments/` | نظرات تایید شده (`?course=` یا `?user=`)؛ ثبت نظر برای دانشجوی همان دوره (بعد از تایید ادمین نمایش داده می‌شود) |
 
 **فایل جلسات:** `video_url` و `pdf_url` فقط برای دانشجوی پرداخت‌کرده، استاد دوره و ادمین برگردانده می‌شوند (جلسات `is_free` برای همه). این لینک‌ها امضا شده‌اند و ۶ ساعت اعتبار دارند و مستقیم در `<video src>` قابل استفاده‌اند.
+
+### استانداردهای فنی و حرفه‌ای (عمومی)
+| متد | آدرس | توضیح |
+|---|---|---|
+| GET | `/api/standards/` | لیست منتشرشده‌ها — `search` (عنوان، کد، توضیحات)، `category`، `page`, `page_size` |
+| GET | `/api/standards/categories/` | گروه‌هایی که استاندارد منتشرشده دارند + تعداد |
+| GET | `/api/standards/<id>/` | جزئیات |
+| GET | `/api/standards/<id>/file/` | شمارش دانلود و انتقال به فایل PDF |
+
+فایل‌ها از پنل مدیریت (منوی «استانداردهای فنی و حرفه‌ای») یا API ادمین `standards/` و `standard-categories/` (سطح ۴) آپلود می‌شوند؛ فقط PDF پذیرفته می‌شود.
 
 ### دانشجو
 | متد | آدرس | توضیح |
@@ -72,7 +95,7 @@ python manage.py runserver
 سطح دسترسی: ۱ گالری، ۴ مدیریت محتوا و دوره‌ها، ۵ مدیر کل.
 
 `login/`, `me/`, `dashboard/`, `register/` (مدیر کل)، و CRUD کامل برای:
-`users/` (۵)، `teachers/` (+ `approve/`, `reject/`)، `courses/`، `sessions/`، `invoices/` (+ `mark-paid/`)، `comment/` (+ `approve/`, `reject/`)، `banner/`، `partner/`، `gallery/` (۱)
+`users/` (۵)، `standards/`، `standard-categories/`، `teachers/` (+ `approve/`, `reject/`)، `courses/`، `sessions/`، `invoices/` (+ `mark-paid/`)، `comment/` (+ `approve/`, `reject/`)، `banner/`، `partner/`، `gallery/` (۱)
 
 ## استقرار
 

@@ -181,6 +181,17 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
 
     TEACHER_FIELDS = ('education_degree', 'academic_field', 'bio')
 
+    def validate_phone_number(self, value):
+        from .phone import normalize_phone
+        if not value:
+            return None
+        phone = normalize_phone(value)
+        if phone is None:
+            raise serializers.ValidationError('شماره موبایل معتبر نیست.')
+        if User.objects.filter(phone_number=phone).exclude(pk=self.instance.pk).exists():
+            raise serializers.ValidationError('این شماره برای حساب دیگری ثبت شده است.')
+        return phone
+
     class Meta:
         model = User
         fields = [
@@ -265,14 +276,24 @@ class CourseListSerializer(serializers.ModelSerializer):
     sessions_count = serializers.IntegerField(read_only=True)
     final_price = serializers.DecimalField(max_digits=12, decimal_places=0, read_only=True)
     is_full = serializers.SerializerMethodField()
+    reviews_count = serializers.IntegerField(read_only=True, default=0)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = [
-            'id', 'title', 'short_description', 'category', 'level', 'tags', 'logo',
+            'id', 'kind', 'title', 'short_description', 'category', 'level', 'tags', 'logo',
             'cost', 'discount_price', 'final_price', 'teacher', 'start_date', 'end_date',
-            'duration', 'limit_students', 'total_students', 'sessions_count', 'is_full', 'rating_avg'
+            'duration', 'limit_students', 'total_students', 'sessions_count', 'is_full', 'rating_avg',
+            'rating', 'reviews_count', 'created_at'
         ]
+
+    def get_rating(self, obj):
+        """Average of approved reviews (rounded to 0.1), null without reviews"""
+        value = getattr(obj, 'rating', None)
+        if value is None:
+            value = obj.rating_avg
+        return round(float(value), 1) if value is not None else None
 
     def get_is_full(self, obj):
         total = getattr(obj, 'total_students', None)
@@ -321,7 +342,7 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = [
-            'id', 'title', 'description', 'short_description', 'category', 'level', 'tags', 'logo',
+            'id', 'kind', 'title', 'description', 'short_description', 'category', 'level', 'tags', 'logo',
             'cost', 'discount_price', 'requirements', 'start_date', 'end_date', 'exam_date', 'duration',
             'limit_students', 'is_active', 'teacher', 'total_students', 'sessions', 'rating_avg',
             'created_at', 'last_updated'

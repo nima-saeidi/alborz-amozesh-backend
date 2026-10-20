@@ -1,6 +1,14 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from .phone_auth import (
+    PhoneCheckAPIView,
+    SendCodeAPIView,
+    VerifyCodeAPIView,
+    PhoneRegisterAPIView,
+    PhoneLoginAPIView,
+    PasswordResetAPIView,
+)
 from .views import (
     RegisterAPIView,
     TeacherRegisterAPIView,
@@ -41,6 +49,12 @@ urlpatterns = [
     path('auth/login/', LoginAPIView.as_view(), name='login'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('auth/logout/', LogoutAPIView.as_view(), name='logout'),
+    path('auth/phone/check/', PhoneCheckAPIView.as_view(), name='phone-check'),
+    path('auth/otp/send/', SendCodeAPIView.as_view(), name='otp-send'),
+    path('auth/otp/verify/', VerifyCodeAPIView.as_view(), name='otp-verify'),
+    path('auth/phone/register/', PhoneRegisterAPIView.as_view(), name='phone-register'),
+    path('auth/phone/login/', PhoneLoginAPIView.as_view(), name='phone-login'),
+    path('auth/password/reset/', PasswordResetAPIView.as_view(), name='password-reset'),
 
     # -------------------- PROFILE --------------------
     path('profile/', UserProfileAPIView.as_view(), name='user-profile'),

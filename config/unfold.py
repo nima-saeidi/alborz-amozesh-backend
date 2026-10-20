@@ -69,6 +69,7 @@ def dashboard_callback(request, context):
             'quick_links': [
                 {'title': 'دوره جدید', 'icon': 'add_circle', 'link': reverse_lazy('admin:users_course_add')},
                 {'title': 'ثبت‌نام دستی', 'icon': 'how_to_reg', 'link': reverse_lazy('admin:users_invoice_add')},
+                {'title': 'استاندارد جدید (PDF)', 'icon': 'picture_as_pdf', 'link': reverse_lazy('admin:standards_technicalstandard_add')},
                 {'title': 'بنر جدید', 'icon': 'imagesmode', 'link': reverse_lazy('admin:admin_panel_banner_add')},
                 {'title': 'بررسی نظرات', 'icon': 'rate_review', 'link': reverse_lazy('admin:admin_panel_comment_changelist') + '?status__exact=pending'},
             ],
@@ -96,17 +97,17 @@ UNFOLD = {
     ],
     'COLORS': {
         'primary': {
-            '50': '#eef4ff',
-            '100': '#dce7ff',
-            '200': '#b9cfff',
-            '300': '#8ab0ff',
-            '400': '#5687ff',
-            '500': '#2f63ff',
-            '600': '#1a47f0',
-            '700': '#1338c9',
-            '800': '#13319f',
-            '900': '#142c7d',
-            '950': '#0b1a4d',
+            '50': '#eef3fc',
+            '100': '#dde7f7',
+            '200': '#bccfee',
+            '300': '#9ab8e0',
+            '400': '#4f86ec',
+            '500': '#0c62e7',
+            '600': '#02229f',
+            '700': '#021c86',
+            '800': '#01186b',
+            '900': '#011245',
+            '950': '#010824',
         },
     },
     'LOGIN': {
@@ -130,6 +131,14 @@ UNFOLD = {
                     {'title': 'جلسات', 'icon': 'play_lesson', 'link': reverse_lazy('admin:users_coursesession_changelist'), 'permission': _can('users.view_coursesession')},
                     {'title': 'ثبت‌نام‌ها و فاکتورها', 'icon': 'receipt_long', 'link': reverse_lazy('admin:users_invoice_changelist'), 'badge': 'config.unfold.badge_unpaid_invoices', 'permission': _can('users.view_invoice')},
                     {'title': 'اساتید', 'icon': 'person_book', 'link': reverse_lazy('admin:users_teacher_changelist'), 'badge': 'config.unfold.badge_pending_teachers', 'permission': _can('users.view_teacher')},
+                ],
+            },
+            {
+                'title': 'استانداردهای فنی و حرفه‌ای',
+                'separator': True,
+                'items': [
+                    {'title': 'استانداردها (PDF)', 'icon': 'picture_as_pdf', 'link': reverse_lazy('admin:standards_technicalstandard_changelist'), 'permission': _can('standards.view_technicalstandard')},
+                    {'title': 'گروه‌های استاندارد', 'icon': 'category', 'link': reverse_lazy('admin:standards_standardcategory_changelist'), 'permission': _can('standards.view_standardcategory')},
                 ],
             },
             {
