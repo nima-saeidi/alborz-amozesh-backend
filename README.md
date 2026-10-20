@@ -81,6 +81,32 @@ python manage.py runserver
 | GET | `/api/student/invoices/` | فاکتورها |
 | GET | `/api/student/courses/` | دوره‌های پرداخت‌شده |
 
+### پنل کاربر (`/api/me/`، با لاگین)
+| متد | آدرس | توضیح |
+|---|---|---|
+| GET / POST | `/api/me/favorites/` | شناسه دوره‌های علاقه‌مندی / افزودن (`course` یا `courses: []`) |
+| DELETE | `/api/me/favorites/<course_id>/` | حذف از علاقه‌مندی |
+| GET | `/api/me/progress/` | جلسات دیده‌شده همه دوره‌ها `{course_id: [session ids]}` |
+| GET / POST | `/api/me/progress/<course_id>/` | پیشرفت یک دوره / علامت جلسه (`session`, `done`) |
+| GET / POST | `/api/me/certificates/` | گواهی‌ها و پیشرفت دوره‌ها / صدور گواهی (`course`) پس از دیدن همه جلسات |
+| GET / POST | `/api/me/tickets/` | تیکت‌ها / تیکت جدید (`subject`, `department`, `course?`, `text`, `attachment?` multipart) |
+| GET | `/api/me/tickets/<id>/` | تیکت با پیام‌ها |
+| POST | `/api/me/tickets/<id>/reply/` · `/close/` | پاسخ / بستن تیکت |
+| GET | `/api/me/notifications/` | اعلان‌ها + تعداد خوانده‌نشده |
+| POST | `/api/me/notifications/read/` | خوانده‌شدن (`ids` یا همه) |
+| GET / POST | `/api/me/teacher/` | وضعیت / درخواست تدریس (بعد از تایید ادمین فعال می‌شود) |
+| GET | `/api/me/teacher/stats/` | آمار پنل استاد |
+
+پاسخ ادمین به تیکت (از بخش «تیکت‌ها» در پنل مدیریت)، تایید پرداخت و صدور گواهی، خودکار برای کاربر اعلان می‌سازد.
+اعلانی که در پنل مدیریت بدون کاربر ساخته شود برای همه کاربران نمایش داده می‌شود.
+
+### فرم‌های عمومی
+| متد | آدرس | توضیح |
+|---|---|---|
+| GET | `/api/certificates/<code>/` | استعلام گواهی‌نامه |
+| POST | `/api/contact/` | فرم تماس با ما (`name`, `phone` یا `email`, `subject`, `message`) |
+| POST | `/api/newsletter/` | عضویت در خبرنامه پیامکی (`phone_number`) |
+
 ### استاد (تایید شده)
 | متد | آدرس | توضیح |
 |---|---|---|

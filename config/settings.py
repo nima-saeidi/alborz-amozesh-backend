@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'users',
     'admin_panel',
     'standards',
+    'portal',
 ]
 
 MIDDLEWARE = [
@@ -151,6 +152,8 @@ REST_FRAMEWORK = {
         'auth': '20/minute',
         'otp': '5/minute',
         'otp_verify': '10/minute',
+        'tickets': '20/hour',
+        'contact': '10/hour',
     },
 }
 

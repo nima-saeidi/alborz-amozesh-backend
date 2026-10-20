@@ -35,6 +35,14 @@ def badge_pending_comments(request):
     return _count('admin_panel.Comment', status='pending') or None
 
 
+def badge_open_tickets(request):
+    return _count('portal.Ticket', status='open') or None
+
+
+def badge_new_contacts(request):
+    return _count('portal.ContactMessage', is_handled=False) or None
+
+
 def _can(permission):
     return lambda request: request.user.is_superuser or request.user.has_perm(permission)
 
@@ -79,6 +87,8 @@ def dashboard_callback(request, context):
                 {'title': 'ثبت‌نام دستی', 'icon': 'how_to_reg', 'link': reverse_lazy('admin:users_invoice_add')},
                 {'title': 'استاندارد جدید (PDF)', 'icon': 'picture_as_pdf', 'link': reverse_lazy('admin:standards_technicalstandard_add')},
                 {'title': 'بنر جدید', 'icon': 'imagesmode', 'link': reverse_lazy('admin:admin_panel_banner_add')},
+                {'title': 'اعلان برای همه', 'icon': 'campaign', 'link': reverse_lazy('admin:portal_notification_add')},
+                {'title': 'تیکت‌های باز', 'icon': 'support_agent', 'link': reverse_lazy('admin:portal_ticket_changelist') + '?status__exact=open'},
                 {'title': 'بررسی نظرات', 'icon': 'rate_review', 'link': reverse_lazy('admin:admin_panel_comment_changelist') + '?status__exact=pending'},
             ],
         },
@@ -150,6 +160,17 @@ UNFOLD = {
                 'items': [
                     {'title': 'استانداردها (PDF)', 'icon': 'picture_as_pdf', 'link': reverse_lazy('admin:standards_technicalstandard_changelist'), 'permission': _can('standards.view_technicalstandard')},
                     {'title': 'گروه‌های استاندارد', 'icon': 'category', 'link': reverse_lazy('admin:standards_standardcategory_changelist'), 'permission': _can('standards.view_standardcategory')},
+                ],
+            },
+            {
+                'title': 'پشتیبانی و ارتباطات',
+                'separator': True,
+                'items': [
+                    {'title': 'تیکت‌ها', 'icon': 'support_agent', 'link': reverse_lazy('admin:portal_ticket_changelist'), 'badge': 'config.unfold.badge_open_tickets', 'permission': _can('portal.view_ticket')},
+                    {'title': 'اعلان‌ها', 'icon': 'notifications', 'link': reverse_lazy('admin:portal_notification_changelist'), 'permission': _can('portal.view_notification')},
+                    {'title': 'گواهی‌نامه‌ها', 'icon': 'workspace_premium', 'link': reverse_lazy('admin:portal_certificate_changelist'), 'permission': _can('portal.view_certificate')},
+                    {'title': 'پیام‌های تماس با ما', 'icon': 'mail', 'link': reverse_lazy('admin:portal_contactmessage_changelist'), 'badge': 'config.unfold.badge_new_contacts', 'permission': _can('portal.view_contactmessage')},
+                    {'title': 'خبرنامه پیامکی', 'icon': 'sms', 'link': reverse_lazy('admin:portal_newslettersubscriber_changelist'), 'permission': _can('portal.view_newslettersubscriber')},
                 ],
             },
             {

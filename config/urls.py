@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/admin/', include('admin_panel.urls')),
     path('api/', include('users.urls')),
     path('api/', include('standards.urls')),
+    path('api/', include('portal.urls')),
 ]
 
 # Media files in development (nginx serves them in production)
