@@ -1,5 +1,5 @@
 """
-Admin theme (django-unfold): Alborz blue, Persian RTL sidebar, dashboard numbers.
+Admin theme (django-unfold): the site's brand (blue / white palette, Alborz logos), Persian RTL sidebar, dashboard numbers.
 Icons are Material Symbols names: https://fonts.google.com/icons
 """
 from datetime import timedelta
@@ -84,9 +84,12 @@ UNFOLD = {
     'SITE_SUBHEADER': 'پنل مدیریت',
     'SITE_URL': '/',
     'SITE_SYMBOL': 'school',
-    'SITE_ICON': lambda request: static('admin_custom/logo.svg'),
+    'SITE_ICON': {
+        'light': lambda request: static('admin_custom/brand/icon-primary.svg'),
+        'dark': lambda request: static('admin_custom/brand/icon-white.svg'),
+    },
     'SITE_FAVICONS': [
-        {'rel': 'icon', 'sizes': 'any', 'type': 'image/svg+xml', 'href': lambda request: static('admin_custom/logo.svg')},
+        {'rel': 'icon', 'sizes': 'any', 'type': 'image/svg+xml', 'href': lambda request: static('admin_custom/brand/icon-primary.svg')},
     ],
     'SHOW_HISTORY': True,
     'SHOW_VIEW_ON_SITE': False,

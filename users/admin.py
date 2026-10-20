@@ -100,10 +100,10 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
     add_form = UserCreationForm
     change_password_form = AdminPasswordChangeForm
 
-    list_display = ('user_info', 'phone_number', 'role', 'is_active', 'joined')
+    list_display = ('user_info', 'username', 'phone_number', 'role', 'is_active', 'joined')
     list_filter = (RoleFilter, 'is_active', 'is_staff', 'gender')
     list_filter_submit = True
-    search_fields = ('email', 'first_name', 'last_name', 'phone_number', 'national_id')
+    search_fields = ('username', 'email', 'first_name', 'last_name', 'phone_number', 'national_id')
     readonly_fields = ('last_login', 'date_joined', 'avatar_large')
     ordering = ('-date_joined',)
     list_per_page = 30

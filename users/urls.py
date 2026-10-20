@@ -9,6 +9,7 @@ from .phone_auth import (
     PhoneLoginAPIView,
     PasswordResetAPIView,
 )
+from .username_auth import UsernameCheckAPIView, UsernameRegisterAPIView, UsernameLoginAPIView
 from .views import (
     RegisterAPIView,
     TeacherRegisterAPIView,
@@ -55,6 +56,9 @@ urlpatterns = [
     path('auth/phone/register/', PhoneRegisterAPIView.as_view(), name='phone-register'),
     path('auth/phone/login/', PhoneLoginAPIView.as_view(), name='phone-login'),
     path('auth/password/reset/', PasswordResetAPIView.as_view(), name='password-reset'),
+    path('auth/username/check/', UsernameCheckAPIView.as_view(), name='username-check'),
+    path('auth/username/register/', UsernameRegisterAPIView.as_view(), name='username-register'),
+    path('auth/username/login/', UsernameLoginAPIView.as_view(), name='username-login'),
 
     # -------------------- PROFILE --------------------
     path('profile/', UserProfileAPIView.as_view(), name='user-profile'),
