@@ -9,6 +9,14 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 
 
+# Bump when the admin theme files change: Cloudflare caches /static/ for 30 days
+THEME_VERSION = '2'
+
+
+def _theme(path):
+    return lambda request: f"{static(path)}?v={THEME_VERSION}"
+
+
 def _count(model_path, **filters):
     from django.apps import apps
     return apps.get_model(model_path).objects.filter(**filters).count()
@@ -96,7 +104,7 @@ UNFOLD = {
     'SHOW_BACK_BUTTON': True,
     'DASHBOARD_CALLBACK': 'config.unfold.dashboard_callback',
     'STYLES': [
-        lambda request: static('admin_custom/unfold.css'),
+        _theme('admin_custom/unfold.css'),
     ],
     'COLORS': {
         'primary': {
@@ -114,7 +122,7 @@ UNFOLD = {
         },
     },
     'LOGIN': {
-        'image': lambda request: static('admin_custom/login.svg'),
+        'image': _theme('admin_custom/login.svg'),
     },
     'SIDEBAR': {
         'show_search': True,
